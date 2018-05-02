@@ -1,16 +1,16 @@
-package com.aizuzi.adapter;
+package com.zuzi.adapter;
 
 /**
- *  @author liyi
- *  create at 2018/4/23
+ * @author liyi
+ * create at 2018/4/23
  **/
-public class FastItemBean<T> implements MultiItemEntity{
+public class FastItemBean<T> implements MultiItemEntity {
 
   private int itemType;
 
   private String itemName;
 
-  private Class<? extends FastBaseViewHolder> itemClass;
+  private Class<? extends FastViewHolder> itemClass;
 
   private T data;
 
@@ -38,12 +38,12 @@ public class FastItemBean<T> implements MultiItemEntity{
     this.data = data;
   }
 
-  public Class<? extends FastBaseViewHolder> getItemClass() {
+  public Class<? extends FastViewHolder> getItemClass() {
     return itemClass;
   }
 
   public void setItemClass(
-      Class<? extends FastBaseViewHolder> itemClass) {
+      Class<? extends FastViewHolder> itemClass) {
     this.itemClass = itemClass;
   }
 }

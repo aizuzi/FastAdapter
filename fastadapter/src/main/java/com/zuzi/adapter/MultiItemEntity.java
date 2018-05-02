@@ -1,4 +1,4 @@
-package com.aizuzi.adapter;
+package com.zuzi.adapter;
 
 /**
  * @author liyi

@@ -1,4 +1,4 @@
-package com.aizuzi.adapter;
+package com.zuzi.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,23 +27,23 @@ public class FastAdapter
 
   private LayoutInflater mLayoutInflater;
 
-  private HashMap<Class<? extends FastBaseViewHolder>,Integer> itemMaps = new HashMap<>();
+  private HashMap<Class<? extends FastViewHolder>, Integer> itemMaps = new HashMap<>();
 
   public FastAdapter(Context context) {
     mLayoutInflater = LayoutInflater.from(context);
   }
 
-  public <TD extends FastBaseViewHolder<T>,T> void addItem(Class<TD> clazz) {
-    addItem(clazz,null);
+  public <TD extends FastViewHolder<T>, T> void addItem(Class<TD> clazz) {
+    addItem(clazz, null);
   }
 
-  public <TD extends FastBaseViewHolder<T>,T> void addItem(Class<TD> clazz,T t) {
+  public <TD extends FastViewHolder<T>, T> void addItem(Class<TD> clazz, T t) {
 
     Integer itemType = itemMaps.get(clazz);
 
-    if(itemType == null || itemType <=0){
+    if (itemType == null || itemType <= 0) {
       itemType = obtainItemType();
-      itemMaps.put(clazz,itemType);
+      itemMaps.put(clazz, itemType);
     }
 
     FastItemBean fastItemBean = new FastItemBean();
@@ -54,20 +55,21 @@ public class FastAdapter
     notifyDataSetChanged();
   }
 
-  private int obtainItemType(){
+  private int obtainItemType() {
     int type = new Random().nextInt(999999);
-    if(itemMaps.containsValue(type)){
+    if (itemMaps.containsValue(type)) {
       return obtainItemType();
     }
     return type;
   }
 
-  private Class<? extends FastBaseViewHolder> getClassByType(int type){
+  private Class<? extends FastViewHolder> getClassByType(int type) {
     //if(itemMaps.containsValue(type))return null;
-    Iterator<Map.Entry<Class<? extends FastBaseViewHolder>,Integer>> iterator = itemMaps.entrySet().iterator();
-    while (iterator.hasNext()){
-      Map.Entry<Class<? extends FastBaseViewHolder>,Integer> item = iterator.next();
-      if(item.getValue() == type){
+    Iterator<Map.Entry<Class<? extends FastViewHolder>, Integer>> iterator =
+        itemMaps.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<Class<? extends FastViewHolder>, Integer> item = iterator.next();
+      if (item.getValue() == type) {
         return item.getKey();
       }
     }
@@ -78,17 +80,32 @@ public class FastAdapter
 
     try {
 
-      FastBaseViewHolder fastBaseViewHolder = getClassByType(viewType).newInstance();
-      View itemView = mLayoutInflater.inflate(fastBaseViewHolder.getLayoutId(), null);
-      //FastViewHolder fastViewHolder = (FastViewHolder) ConstructorUtils.invokeConstructor(fastBaseViewHolder.get(), itemView);
-      FastViewHolder fastViewHolder = new FastViewHolder(itemView);
+      Class<? extends FastViewHolder> fastBaseViewHolderClass = getClassByType(viewType);
 
-      fastBaseViewHolder.setFastViewHolder(fastViewHolder);
-      fastViewHolder.setFastBaseViewHolder(fastBaseViewHolder);
+      RecyclerItemLayoutId recyclerItemLayoutId =
+          fastBaseViewHolderClass.getAnnotation(RecyclerItemLayoutId.class);
+      if (recyclerItemLayoutId == null) {
+        throw new IllegalArgumentException("RecyclerItemLayoutId is null");
+      }
+      int layoutId = recyclerItemLayoutId.value();
 
-      fastBaseViewHolder.onCreate();
+      if (layoutId == 0) {
+        throw new IllegalArgumentException("layoutId is null");
+      }
 
-      return fastViewHolder;
+      View itemView = mLayoutInflater.inflate(layoutId, parent, false);
+
+      try {
+        FastViewHolder fastViewHolder =
+            fastBaseViewHolderClass.getConstructor(View.class).newInstance(itemView);
+        fastViewHolder.onCreate();
+        return fastViewHolder;
+      } catch (InvocationTargetException e) {
+        e.printStackTrace();
+      } catch (NoSuchMethodException e) {
+        e.printStackTrace();
+      }
+      return null;
     } catch (InstantiationException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -98,7 +115,7 @@ public class FastAdapter
   }
 
   @Override public void onBindViewHolder(FastViewHolder holder, int position) {
-    holder.getFastBaseViewHolder().refreshItem(mDatas.get(position).getData());
+    holder.refreshItem(mDatas.get(position).getData());
   }
 
   @Override
