@@ -23,7 +23,7 @@ android:
     - extra-google-m2repository
 
 script:
-  ./gradlew build
+  - ./gradlew assembleRelease
 
 before_install:
 - yes | sdkmanager "platforms;android-27"
