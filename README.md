@@ -2,6 +2,7 @@
 
 FastAdapter
 ==========================
+[![Build Status](https://api.travis-ci.org/aizuzi/FastAdapter.svg?branch=master)](https://github.com/aizuzi/FastAdapter)
 [![GitHub release](https://img.shields.io/badge/gradle-0.1.5-blue.svg)](https://github.com/aizuzi/FastAdapter/releases) 
 
 使用FastAdapter，可以更加快速简单的使用RecylerView。
