@@ -39,7 +39,8 @@ compile 'com.zuzi:fastadapter:0.1.5'
  fastAdapter.addItem(TextViewHolder1.class,"Text ViewHolder");
 ```
 
-
+## fastadapter交流平台
+* QQ群：780275143
 
 ## License
 
