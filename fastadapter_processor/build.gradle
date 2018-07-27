@@ -1,4 +1,6 @@
 apply plugin: 'java-library'
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.aizuzi'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -12,3 +14,15 @@ dependencies {
 
 sourceCompatibility = "7"
 targetCompatibility = "7"
+
+jar {
+    manifest {
+        attributes(
+            "Manifest-Version": 1.0,
+            "Main-Class": "com.testbird.rio.Main")
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    into('assets') {
+        from 'assets'
+    }
+}
