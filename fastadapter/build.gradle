@@ -14,7 +14,6 @@ android {
     versionName "1.0"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    javaCompileOptions { annotationProcessorOptions { includeCompileClasspath = true } }
   }
 
   buildTypes {
@@ -28,7 +27,10 @@ android {
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
   implementation 'com.android.support:recyclerview-v7:27.1.1'
-  api project(':fastadapter_processor')
+  implementation 'com.github.aizuzi.FastAdapter:fastadapter_processor:0.1.6'
+  annotationProcessor 'com.github.aizuzi.FastAdapter:fastadapter_processor:0.1.6'
+//  api project(':fastadapter_processor')
+//  annotationProcessor project(':fastadapter_processor')
 
   testImplementation 'junit:junit:4.12'
 //  androidTestImplementation 'com.android.support.test:runner:1.0.1'
