@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
   compileSdkVersion 27
@@ -12,6 +13,7 @@ android {
     versionName "1.0"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    javaCompileOptions { annotationProcessorOptions { includeCompileClasspath = true } }
   }
 
   buildTypes {
@@ -24,11 +26,12 @@ android {
 
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
-  compileOnly 'com.android.support:recyclerview-v7:27.1.1'
+  implementation 'com.android.support:recyclerview-v7:27.1.1'
+  api project(':fastadapter_processor')
 
   testImplementation 'junit:junit:4.12'
-  androidTestImplementation 'com.android.support.test:runner:1.0.1'
-  androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+//  androidTestImplementation 'com.android.support.test:runner:1.0.1'
+//  androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }
 
 //apply from: "publish.gradle"

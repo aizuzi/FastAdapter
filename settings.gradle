@@ -1,1 +1,1 @@
-include ':app', ':fastadapter'
+include ':app', ':fastadapter', ':fastadapter_processor'
