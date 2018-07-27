@@ -1,18 +1,18 @@
 package com.zuzi.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import java.lang.reflect.InvocationTargetException;
+import android.widget.ImageView;
+import android.widget.TextView;
+import com.zuzi.adapter.annotation.FastAttribute;
+import com.zuzi.adapter.annotation.RecyclerItemLayoutId;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * 快速使用多类型的RecyclerView Adapter
@@ -21,107 +21,112 @@ import java.util.Random;
  * create at 2018/4/23
  **/
 public class FastAdapter
-    extends RecyclerView.Adapter<FastViewHolder> {
+    extends RecyclerView.Adapter<SimpleViewHolder> {
 
   public List<FastItemBean> mDatas = new ArrayList<>();
 
-  private LayoutInflater mLayoutInflater;
+  private ItemTypeManager mItemTypeManager = new ItemTypeManager();
 
-  private HashMap<Class<? extends FastViewHolder>, Integer> itemMaps = new HashMap<>();
+  private LayoutInflater mLayoutInflater;
 
   public FastAdapter(Context context) {
     mLayoutInflater = LayoutInflater.from(context);
   }
 
-  public <TD extends FastViewHolder<T>, T> void addItem(Class<TD> clazz) {
-    addItem(clazz, null);
-  }
-
-  public <TD extends FastViewHolder<T>, T> void addItem(Class<TD> clazz, T t) {
-
-    Integer itemType = itemMaps.get(clazz);
-
-    if (itemType == null || itemType <= 0) {
-      itemType = obtainItemType();
-      itemMaps.put(clazz, itemType);
-    }
+  public <T extends FastBaseHolder> void addItem(T t) {
 
     FastItemBean fastItemBean = new FastItemBean();
-    fastItemBean.setItemClass(clazz);
-    fastItemBean.setItemType(itemType);
-    fastItemBean.setData(t);
+    fastItemBean.setItemClass(t);
+    fastItemBean.setItemType(t.getItemType());
+
     mDatas.add(fastItemBean);
 
     notifyDataSetChanged();
   }
 
-  private int obtainItemType() {
-    int type = new Random().nextInt(999999);
-    if (itemMaps.containsValue(type)) {
-      return obtainItemType();
+  @Override public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+    FastItemBean fastItemBean = mItemTypeManager.getItemByViewType(viewType);
+
+    RecyclerItemLayoutId recyclerItemLayoutId = findItemLayout(fastItemBean.getItemClass());
+    if (recyclerItemLayoutId == null) {
+      throw new IllegalArgumentException("RecyclerItemLayoutId is null");
     }
-    return type;
+    int layoutId = recyclerItemLayoutId.value();
+
+    if (layoutId == 0) {
+      throw new IllegalArgumentException("layoutId is null");
+    }
+
+    View itemView = mLayoutInflater.inflate(layoutId, parent, false);
+
+    return new SimpleViewHolder(itemView);
   }
 
-  private Class<? extends FastViewHolder> getClassByType(int type) {
-    //if(itemMaps.containsValue(type))return null;
-    Iterator<Map.Entry<Class<? extends FastViewHolder>, Integer>> iterator =
-        itemMaps.entrySet().iterator();
-    while (iterator.hasNext()) {
-      Map.Entry<Class<? extends FastViewHolder>, Integer> item = iterator.next();
-      if (item.getValue() == type) {
-        return item.getKey();
+  @Override public void onBindViewHolder(@NonNull SimpleViewHolder holder, int position) {
+    FastBaseHolder baseHolder = mDatas.get(position).getItemClass();
+    baseHolder.itemView = holder.itemView;
+
+    Field[] fields = baseHolder.getClass()
+        .getSuperclass()
+        .getDeclaredFields();
+
+    if (fields != null) {
+      for (int i = 0; i < fields.length; i++) {
+        FastAttribute fastAttribute = fields[i].getAnnotation(FastAttribute.class);
+        if (fastAttribute != null && fastAttribute.bindViewId() != 0) {
+          View view = baseHolder.findViewById(fastAttribute.bindViewId());
+          Object obj = mDatas.get(position).getItemClass().getValue(fastAttribute.bindViewId());
+          if (!baseHolder.handlerViewValue(view, obj)) {
+            handlerViewValue(view, obj);
+          }
+        }
       }
     }
-    return null;
+    mDatas.get(position).getItemClass().bind(holder.itemView, position);
   }
 
-  @Override public FastViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  private RecyclerItemLayoutId findItemLayout(FastBaseHolder fastBaseHolder) {
 
-    try {
+    RecyclerItemLayoutId recyclerItemLayoutId =
+        fastBaseHolder.getClass()
+            .getSuperclass()
+            .getAnnotation(RecyclerItemLayoutId.class);
 
-      Class<? extends FastViewHolder> fastBaseViewHolderClass = getClassByType(viewType);
-
-      RecyclerItemLayoutId recyclerItemLayoutId =
-          fastBaseViewHolderClass.getAnnotation(RecyclerItemLayoutId.class);
-      if (recyclerItemLayoutId == null) {
-        throw new IllegalArgumentException("RecyclerItemLayoutId is null");
-      }
-      int layoutId = recyclerItemLayoutId.value();
-
-      if (layoutId == 0) {
-        throw new IllegalArgumentException("layoutId is null");
-      }
-
-      View itemView = mLayoutInflater.inflate(layoutId, parent, false);
-
-      try {
-        FastViewHolder fastViewHolder =
-            fastBaseViewHolderClass.getConstructor(View.class).newInstance(itemView);
-        fastViewHolder.onCreate();
-        return fastViewHolder;
-      } catch (InvocationTargetException e) {
-        e.printStackTrace();
-      } catch (NoSuchMethodException e) {
-        e.printStackTrace();
-      }
-      return null;
-    } catch (InstantiationException e) {
-      e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
+    if (recyclerItemLayoutId == null) {
+      recyclerItemLayoutId =
+          fastBaseHolder.getClass().getAnnotation(RecyclerItemLayoutId.class);
     }
-    return null;
+    return recyclerItemLayoutId;
   }
 
-  @Override public void onBindViewHolder(FastViewHolder holder, int position) {
-    holder.refreshItem(mDatas.get(position).getData());
+  private void handlerViewValue(View view, Object obj) {
+    if (obj == null || view == null) return;
+    if (view instanceof TextView) {
+      if (obj instanceof String) {
+        ((TextView) view).setText("" + obj);
+      } else if (obj instanceof Integer) {
+        ((TextView) view).setText((Integer) obj);
+      }
+    } else if (view instanceof ImageView) {
+      if (obj instanceof Integer) {
+        ((ImageView) view).setImageResource((Integer) obj);
+      }
+    }
+  }
+
+  @Override public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+    super.onDetachedFromRecyclerView(recyclerView);
+  }
+
+  @Override public void onViewDetachedFromWindow(@NonNull SimpleViewHolder holder) {
+    super.onViewDetachedFromWindow(holder);
   }
 
   @Override
   public int getItemViewType(int position) {
     if (position < 0) return 0;
-    return mDatas.get(position).getItemType();
+    return mItemTypeManager.getViewType(mDatas.get(position));
   }
 
   @Override
