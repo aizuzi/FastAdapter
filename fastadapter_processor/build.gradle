@@ -9,7 +9,7 @@ dependencies {
     implementation 'com.google.auto.service:auto-service:1.0-rc3'
     implementation 'com.google.android:android:4.1.1.4'
 //    implementation project(':fastadapter')
-    api 'com.github.aizuzi.FastAdapter:fastadapter:0.1.7+'
+    api 'com.github.aizuzi.FastAdapter:fastadapter:0.2.1'
 
 }
 
