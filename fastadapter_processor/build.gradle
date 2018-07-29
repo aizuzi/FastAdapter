@@ -3,13 +3,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.aizuzi'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     // 用于生成Java文件的库
     implementation 'com.squareup:javapoet:1.8.0'
     implementation 'com.google.auto.service:auto-service:1.0-rc3'
     implementation 'com.google.android:android:4.1.1.4'
-    api project(':fastadapter_processor')
+//    implementation project(':fastadapter')
+    api 'com.github.aizuzi.FastAdapter:fastadapter:0.1.7+'
 
 }
 
