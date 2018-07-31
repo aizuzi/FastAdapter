@@ -1,11 +1,9 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.aizuzi'
+group = 'com.github.aizuzi'
 
 android {
   compileSdkVersion 27
-
-
 
   defaultConfig {
     minSdkVersion 15
@@ -14,7 +12,8 @@ android {
     versionName "1.0"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    android.defaultConfig.javaCompileOptions.annotationProcessorOptions.includeCompileClasspath = true
+    android.defaultConfig.javaCompileOptions.annotationProcessorOptions.includeCompileClasspath =
+        true
   }
 
   buildTypes {
@@ -26,9 +25,9 @@ android {
 }
 
 dependencies {
-  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  api fileTree(dir: 'libs', include: ['*.jar'])
   implementation 'com.android.support:recyclerview-v7:27.1.1'
-  api project(':fastadapter_annotation')
+  //  api project(':fastadapter_annotation')
 
   testImplementation 'junit:junit:4.12'
 }
