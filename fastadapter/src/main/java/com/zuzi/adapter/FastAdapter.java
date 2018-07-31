@@ -59,6 +59,7 @@ public class FastAdapter
     }
 
     View itemView = mLayoutInflater.inflate(layoutId, parent, false);
+    fastItemBean.getItemClass().onCreate(itemView);
 
     return new SimpleViewHolder(itemView);
   }
