@@ -1,6 +1,12 @@
 apply plugin: 'java-library'
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.aizuzi'
+//apply plugin: 'maven'
+//apply plugin: 'signin`g'
+//apply plugin: 'com.github.dcendents.android-maven'
+//group='com.github.aizuzi'
+
+//archivesBaseName = 'fastadapter_processor'
+//group = 'com.zuzi'
+//version = '0.2.7'
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -9,20 +15,28 @@ dependencies {
     implementation 'com.google.auto.service:auto-service:1.0-rc3'
     implementation 'com.google.android:android:4.1.1.4'
     implementation project(':fastadapter_annotation')
-
 }
 
 sourceCompatibility = "7"
 targetCompatibility = "7"
 
-jar {
-    manifest {
-        attributes(
-            "Manifest-Version": 1.0,
-            "Main-Class": "com.testbird.rio.Main")
-    }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    into('assets') {
-        from 'assets'
-    }
+apply from: rootProject.file('gradle/release-bintray.gradle')
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
 }
+artifacts.add('archives', sourcesJar)
+
+//jar {
+//    manifest {
+//        attributes(
+//            "Manifest-Version": 1.0,
+//            "Main-Class": "com.testbird.rio.Main")
+//    }
+//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+//    into('assets') {
+//        from 'assets'
+//    }
+//}
+
+//apply from: rootProject.file('gradle/publish.gradle')

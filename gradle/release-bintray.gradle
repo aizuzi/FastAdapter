@@ -1,0 +1,35 @@
+//apply plugin: 'com.android.library'
+
+// Set up everything required for releasing on Bintray
+ext {
+  bintrayRepo = REPO_NAME
+  bintrayUserOrg = 'zuzi'
+  bintrayName = POM_ARTIFACT_ID
+  bintrayDescription = POM_DESCRIPTION
+  projectUrl = 'https://github.com/aizuzi/FastAdapter'
+  issuesUrl = 'https://github.com/aizuzi/FastAdapter/issues'
+  scmUrl = 'https://github.com/aizuzi/FastAdapter.git'
+  scmConnection = 'scm:git:https://github.com/aizuzi/FastAdapter.git'
+  scmDeveloperConnection = 'scm:git:https://github.com/aizuzi/FastAdapter.git'
+
+  publishedGroupId = GROUP
+  libraryName = 'fastadapter'
+  artifact = 'fastadapter'
+
+  developerId = 'aizuzi1101'
+  developerName = 'Liyi'
+
+  projectLicenses = {
+    license {
+      name 'MIT License'
+      url 'https://github.com/aizuzi/FastAdapter/blob/master/LICENSE'
+      distribution 'repo'
+    }
+  }
+}
+
+// Set up the Android Maven publication (POM etc.)
+apply from: rootProject.file('gradle/android-maven-install.gradle')
+
+// Upload to Bintray
+apply from: rootProject.file('gradle/bintray.gradle')

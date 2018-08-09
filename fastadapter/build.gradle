@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-group = 'com.github.aizuzi'
+apply plugin: 'maven'
+//apply plugin: 'com.github.dcendents.android-maven'
+//group = 'com.github.aizuzi'
 
 android {
   compileSdkVersion 27
@@ -22,15 +23,52 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
+
+//  libraryVariants.all {
+//    it.generateBuildConfig.enabled = false
+//  }
 }
+
+//android.libraryVariants.all { variant ->
+//  def name = variant.buildType.name
+//  if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+//    return;
+//  }
+//  def task = project.tasks.create "jar${name.capitalize()}", Jar
+//  task.dependsOn variant.javaCompile
+//  task.from variant.javaCompile.destinationDir
+//  artifacts.add('archives', task);
+//}
 
 dependencies {
   api fileTree(dir: 'libs', include: ['*.jar'])
   implementation 'com.android.support:recyclerview-v7:27.1.1'
-  //  api project(':fastadapter_annotation')
+  api project(':fastadapter_processor')
+  api project(':fastadapter_annotation')
 
   testImplementation 'junit:junit:4.12'
 }
 
-//apply from: "publish.gradle"
+
+ext {
+  name = 'fastadapter'			        // lib名称，比如：My_Lib
+  desc = 'fastadapter'   			        // 库的描述尽量不要用中文
+
+  groupId = 'com.zuzi'			     // 填写groupId， 一般是包名，比如：com.android.support
+  repo = 'fastadapter'			     // repo
+  //artifactId = '你的aritfactId'	 	 // 这里不需要再填写，自动以Model的名字作为aritfactId
+  versionName = '0.3.2'			            // 版本号，比如：22.2.1
+
+  websiteUrl = 'https://github.com/aizuzi/FastAdapter'		       // 可以填写github上的库地址.
+  issueTrackerUrl = 'https://github.com/aizuzi/FastAdapter'	    // 可以填写github库的issue地址.
+  vcsUrl = 'https://github.com/aizuzi/FastAdapter.git'		         // 可以填写github上库的地址.
+}
+apply from: rootProject.file('gradle/release-bintray.gradle')
+//apply from: rootProject.file('gradle/publish.gradle')
+
+task sourcesJar(type: Jar) {
+  from android.sourceSets.main.java.srcDirs
+  classifier = 'sources'
+}
+artifacts.add('archives', sourcesJar)
 
