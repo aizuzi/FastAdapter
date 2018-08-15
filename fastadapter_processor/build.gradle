@@ -14,7 +14,7 @@ dependencies {
     implementation 'com.squareup:javapoet:1.8.0'
     implementation 'com.google.auto.service:auto-service:1.0-rc3'
     implementation 'com.google.android:android:4.1.1.4'
-    implementation project(':fastadapter_annotation')
+    api project(':fastadapter_annotation')
 }
 
 sourceCompatibility = "7"
@@ -27,16 +27,14 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 artifacts.add('archives', sourcesJar)
 
-//jar {
-//    manifest {
-//        attributes(
-//            "Manifest-Version": 1.0,
-//            "Main-Class": "com.testbird.rio.Main")
-//    }
-//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-//    into('assets') {
-//        from 'assets'
-//    }
-//}
-
-//apply from: rootProject.file('gradle/publish.gradle')
+jar {
+    manifest {
+        attributes(
+            "Manifest-Version": 1.0,
+            "Main-Class": "com.testbird.rio.Main")
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    into('assets') {
+        from 'assets'
+    }
+}

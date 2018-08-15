@@ -2,10 +2,20 @@
 apply plugin: 'com.jfrog.bintray'
 
 def getBintrayUsername() {
+  //加载资源
+  Properties properties = new Properties()
+  InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream() ;
+  properties.load( inputStream )
+
   return properties.get('JCENTER_USERNAME', System.getenv('JCENTER_USERNAME'))
 }
 
 def getBintrayApiKey() {
+  //加载资源
+  Properties properties = new Properties()
+  InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream() ;
+  properties.load( inputStream )
+  
   return properties.get('JCENTER_PASSWORD',  System.getenv('JCENTER_PASSWORD '))
 }
 
@@ -30,6 +40,7 @@ def dryRunOnly() {
 }
 
 bintray {
+
   user = getBintrayUsername()
   key = getBintrayApiKey()
   configurations = ['archives']
