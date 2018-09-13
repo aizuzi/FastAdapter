@@ -8,9 +8,4 @@ dependencies {
 sourceCompatibility = "7"
 targetCompatibility = "7"
 
-apply from: rootProject.file('gradle/release-bintray.gradle')
-task sourcesJar(type: Jar, dependsOn: classes) {
-  classifier = 'sources'
-  from sourceSets.main.allSource
-}
-artifacts.add('archives', sourcesJar)
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

@@ -1,0 +1,215 @@
+/*
+ * Copyright 2013 Chris Banes
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
+
+def isReleaseBuild() {
+  return VERSION_NAME.contains("SNAPSHOT") == false
+}
+
+def getReleaseRepositoryUrl() {
+  return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
+      : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+}
+
+def getSnapshotRepositoryUrl() {
+  return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
+      : "https://oss.sonatype.org/content/repositories/snapshots/"
+}
+
+def getRepositoryUsername() {
+  return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+def getRepositoryPassword() {
+  return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+afterEvaluate { project ->
+
+  ext.addDependency = { dependencyNode, group, name, version ->
+    dependencyNode.appendNode('groupId', group)
+    dependencyNode.appendNode('artifactId', name)
+    dependencyNode.appendNode('version', version)
+    dependencyNode.appendNode('scope', "compile")
+  }
+  ext {
+    pomFile = file("${project.buildDir}/generated-pom.xml")
+  }
+
+  def pomConfig = {
+
+    scm {
+      url POM_SCM_URL
+      connection POM_SCM_CONNECTION
+      developerConnection POM_SCM_DEV_CONNECTION
+    }
+
+    licenses {
+      license {
+        name POM_LICENCE_NAME
+        url POM_LICENCE_URL
+        distribution POM_LICENCE_DIST
+      }
+    }
+
+    developers {
+      developer {
+        id POM_DEVELOPER_ID
+        name POM_DEVELOPER_NAME
+      }
+    }
+  }
+
+  if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+      tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+      }
+    }
+  }
+
+  if (project.getPlugins().hasPlugin('com.android.application') ||
+      project.getPlugins().hasPlugin('com.android.library')) {
+    task androidJavadocs(type: Javadoc) {
+      failOnError = false
+      source = android.sourceSets.main.java.source
+      classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
+
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+      classifier = 'javadoc'
+      from androidJavadocs.destinationDir
+    }
+
+    task androidSourcesJar(type: Jar) {
+      classifier = 'sources'
+      from android.sourceSets.main.java.source
+    }
+  } else {
+    task sourcesJar(type: Jar, dependsOn: classes) {
+      classifier = 'sources'
+      from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+      classifier = 'javadoc'
+      from javadoc.destinationDir
+    }
+  }
+
+  artifacts {
+    if (project.getPlugins().hasPlugin('com.android.application') ||
+        project.getPlugins().hasPlugin('com.android.library')) {
+      archives androidSourcesJar
+      archives androidJavadocsJar
+    }else{
+      archives sourcesJar
+      archives javadocJar
+    }
+  }
+
+  publishing {
+    publications {
+      release(MavenPublication) {
+        groupId GROUP
+        artifactId POM_ARTIFACT_ID
+        version VERSION_NAME
+
+        if (project.getPlugins().hasPlugin('com.android.application') ||
+            project.getPlugins().hasPlugin('com.android.library')) {
+          artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+          artifact androidSourcesJar
+          artifact androidJavadocsJar
+        } else {
+          artifact("$buildDir/libs/${project.getName()}.jar")
+          artifact sourcesJar
+          artifact javadocJar
+        }
+        if (signing.required) {
+
+          project.tasks.signArchives.signatureFiles.each {
+            artifact(it) {
+              def matcher = it.file =~ /-?(?<classifier>sources|javadoc)?\.(?<extension>jar|aar)\.asc$/
+
+              if (matcher.find()) {
+                classifier = matcher.group('classifier')
+                extension = matcher.group('extension') + '.asc'
+              }
+            }
+          }
+        }
+        pom{
+          packaging POM_PACKAGING
+        }
+        pom.withXml {
+          asNode().appendNode('name', POM_NAME);
+          asNode().appendNode('description', POM_DESCRIPTION);
+          asNode().appendNode('url', POM_SCM_URL);
+          def dependenciesNode = asNode().appendNode('dependencies');
+          configurations.implementation.allDependencies.each {
+            // Ensure dependencies such as fileTree are not included.
+            if (it.name != 'unspecified') {
+              def dependencyNode = dependenciesNode.appendNode('dependency')
+              if (it.version != "unspecified") {
+                addDependency(dependencyNode, it.group, it.name, it.version)
+              } else {
+                addDependency(dependencyNode, it.getDependencyProject().findProperty("GROUP"),
+                    it.getDependencyProject().findProperty("POM_ARTIFACT_ID"), VERSION_NAME)
+              }
+            }
+          }
+          asNode().children().last() + pomConfig
+
+          writeTo(project.ext.pomFile)
+          def pomAscFile = signing.sign(project.ext.pomFile).signatureFiles[0]
+
+          artifact(pomAscFile) {
+            classifier = null
+            extension = 'pom.asc'
+          }
+
+          project.ext.pomFile.delete()
+        }
+      }
+    }
+
+    repositories {
+      maven {
+        //指定要上传的maven私服仓库
+        url = getReleaseRepositoryUrl()
+        //认证用户和密码
+        credentials {
+          username getRepositoryUsername()
+          password getRepositoryPassword()
+        }
+      }
+    }
+  }
+    signing {
+      required { isReleaseBuild() }
+      sign configurations.archives
+    }
+
+}
+  model {
+
+    tasks.publishReleasePublicationToMavenRepository {
+      dependsOn(project.tasks.signArchives)
+    }
+  }

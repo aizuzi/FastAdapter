@@ -9,7 +9,7 @@ import com.zuzi.adapter.annotation.RecyclerItemLayoutId;
  * create at 2018/4/26
  **/
 @RecyclerItemLayoutId(R.layout.item_text)
-public class ItemViewHolder extends AppBaseHolder {
+public abstract class ItemViewHolder extends AppBaseHolder {
 
   @FastAttribute(bindViewId = R.id.title_tv)
   String title;

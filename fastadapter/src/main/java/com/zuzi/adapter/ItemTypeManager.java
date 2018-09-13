@@ -10,20 +10,20 @@ public class ItemTypeManager {
 
   private Class lastItemClazz;
 
-  private FastItemBean lastFastItemBean;
+  private FastBaseHolder lastFastItemBean;
 
   private HashMap<Class, Integer> itemTypeMaps = new HashMap<>();
 
   public ItemTypeManager() {
   }
 
-  public int getViewType(FastItemBean fastItemBean) {
-    lastItemClazz = fastItemBean.getItemClass().getClass();
+  public int getViewType(FastBaseHolder fastItemBean) {
+    lastItemClazz = fastItemBean.getClass();
     lastFastItemBean = fastItemBean;
     return fastItemBean.getItemType();
   }
 
-  public FastItemBean getItemByViewType(int viewType) {
+  public FastBaseHolder getItemByViewType(int viewType) {
     if (lastFastItemBean != null && lastFastItemBean.getItemType() == viewType) {
       return lastFastItemBean;
     }

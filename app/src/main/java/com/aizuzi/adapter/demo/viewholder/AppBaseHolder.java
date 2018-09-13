@@ -11,13 +11,10 @@ import com.zuzi.adapter.FastBaseHolder;
  * create at 2018/4/28
  **/
 public abstract class AppBaseHolder extends FastBaseHolder {
-  @Override public void onCreate(View itemView) {
-    super.onCreate(itemView);
-    ButterKnife.bind(this, itemView);
-  }
 
   @Override public void bind(View itemView, int position) {
     super.bind(itemView, position);
+    ButterKnife.bind(this, itemView);
   }
 
   @Override public boolean handlerViewValue(View view, Object obj) {
@@ -27,6 +24,7 @@ public abstract class AppBaseHolder extends FastBaseHolder {
         Glide.with(itemView.getContext())
             .load("" + obj)
             .into((ImageView) view);
+        return true;
       }
     }
     return super.handlerViewValue(view, obj);

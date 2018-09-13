@@ -3,7 +3,6 @@ package com.zuzi.adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,7 @@ import java.util.List;
 public class FastAdapter
     extends RecyclerView.Adapter<SimpleViewHolder> {
 
-  public List<FastItemBean> mDatas = new ArrayList<>();
+  public List<FastBaseHolder> mDatas = new ArrayList<>();
 
   private ItemTypeManager mItemTypeManager = new ItemTypeManager();
 
@@ -36,20 +35,16 @@ public class FastAdapter
 
   public <T extends FastBaseHolder> void addItem(T t) {
 
-    FastItemBean fastItemBean = new FastItemBean();
-    fastItemBean.setItemClass(t);
-    fastItemBean.setItemType(t.getItemType());
-
-    mDatas.add(fastItemBean);
+    mDatas.add(t);
 
     notifyDataSetChanged();
   }
 
   @Override public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-    FastItemBean fastItemBean = mItemTypeManager.getItemByViewType(viewType);
+    FastBaseHolder fastBaseHolder = mItemTypeManager.getItemByViewType(viewType);
 
-    RecyclerItemLayoutId recyclerItemLayoutId = findItemLayout(fastItemBean.getItemClass());
+    RecyclerItemLayoutId recyclerItemLayoutId = findItemLayout(fastBaseHolder);
     if (recyclerItemLayoutId == null) {
       throw new IllegalArgumentException("RecyclerItemLayoutId is null");
     }
@@ -60,13 +55,12 @@ public class FastAdapter
     }
 
     View itemView = mLayoutInflater.inflate(layoutId, parent, false);
-    fastItemBean.getItemClass().onCreate(itemView);
-    
+
     return new SimpleViewHolder(itemView);
   }
 
   @Override public void onBindViewHolder(@NonNull SimpleViewHolder holder, int position) {
-    FastBaseHolder baseHolder = mDatas.get(position).getItemClass();
+    FastBaseHolder baseHolder = mDatas.get(position);
     baseHolder.itemView = holder.itemView;
 
     Field[] fields = baseHolder.getClass()
@@ -78,14 +72,14 @@ public class FastAdapter
         FastAttribute fastAttribute = fields[i].getAnnotation(FastAttribute.class);
         if (fastAttribute != null && fastAttribute.bindViewId() != 0) {
           View view = baseHolder.findViewById(fastAttribute.bindViewId());
-          Object obj = mDatas.get(position).getItemClass().getValue(fastAttribute.bindViewId());
+          Object obj = mDatas.get(position).getValue(fastAttribute.bindViewId());
           if (!baseHolder.handlerViewValue(view, obj)) {
             handlerViewValue(view, obj);
           }
         }
       }
     }
-    mDatas.get(position).getItemClass().bind(holder.itemView, position);
+    mDatas.get(position).bind(holder.itemView, position);
   }
 
   private RecyclerItemLayoutId findItemLayout(FastBaseHolder fastBaseHolder) {

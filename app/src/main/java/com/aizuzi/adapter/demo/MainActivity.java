@@ -7,8 +7,9 @@ import android.support.v7.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.aizuzi.adapter.demo.viewholder.ItemViewHolder_;
-import com.aizuzi.adapter.demo.viewholder.TopViewHolder;
+import com.aizuzi.adapter.demo.viewholder.TopViewHolder_;
 import com.zuzi.adapter.FastAdapter;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,13 +43,13 @@ public class MainActivity extends AppCompatActivity {
 
   private void setAdapter() {
     FastAdapter fastAdapter = new FastAdapter(this);
-    fastAdapter.addItem(new TopViewHolder());
+    fastAdapter.addItem(new TopViewHolder_());
 
     for (int i = 0; i < images.length * 10; i++) {
       fastAdapter.addItem(new ItemViewHolder_()
           .setTitle("ViewHolder：" + i)
           .setIcon(R.mipmap.ic_launcher)
-          .setImage(images[i % images.length]));
+          .setImage(images[new Random().nextInt(images.length)]));
     }
 
     mRecyclerView.setAdapter(fastAdapter);

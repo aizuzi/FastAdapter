@@ -1,7 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
-//apply plugin: 'com.github.dcendents.android-maven'
-//group = 'com.github.aizuzi'
+//apply plugin: 'maven'
 
 android {
   compileSdkVersion 27
@@ -34,11 +32,4 @@ dependencies {
   testImplementation 'junit:junit:4.12'
 }
 
-apply from: rootProject.file('gradle/release-bintray.gradle')
-
-task sourcesJar(type: Jar) {
-  from android.sourceSets.main.java.srcDirs
-  classifier = 'sources'
-}
-artifacts.add('archives', sourcesJar)
-
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
