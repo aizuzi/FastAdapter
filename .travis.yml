@@ -27,3 +27,4 @@ script:
 
 before_install:
 - yes | sdkmanager "platforms;android-27"
+- yes | sudo sdkmanager --licenses
