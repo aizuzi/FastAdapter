@@ -6,7 +6,7 @@ FastAdapter
 [![GitHub release](https://img.shields.io/badge/gradle-0.3.8-blue.svg)](https://github.com/aizuzi/FastAdapter/releases)
 
 使用FastAdapter，可以更加快速简单的使用RecylerView。
-建立一个ViewHolder，然后使用fastAdapter.addItem即可使用，无需创建复杂的RecylerView Adapter。
+建立一个ViewHolder，然后使用fastAdapter.addItem即可使用，无需创建复杂的RecylerView Adapter和ViewHolder。
 
 ## 如何使用它？
 1.在项目的build.gradle文件添加
