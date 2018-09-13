@@ -13,7 +13,7 @@ import com.zuzi.adapter.annotation.RecyclerItemLayoutId;
  * create at 2018/4/26
  **/
 @RecyclerItemLayoutId(R.layout.item_image)
-public class TopViewHolder extends AppBaseHolder {
+public abstract class TopViewHolder extends AppBaseHolder {
 
   @FastAttribute
   String url;

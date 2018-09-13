@@ -25,8 +25,6 @@ public abstract class FastBaseHolder {
     return position;
   }
 
-  public void onCreate(View itemView){}
-
   public void bind(View itemView, int position) {
     this.itemView = itemView;
     this.position = position;
