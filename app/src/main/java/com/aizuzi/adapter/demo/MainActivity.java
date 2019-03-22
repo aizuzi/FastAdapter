@@ -1,9 +1,9 @@
 package com.aizuzi.adapter.demo;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.aizuzi.adapter.demo.viewholder.ItemViewHolder_;
@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
           .setIcon(R.mipmap.ic_launcher)
           .setImage(images[new Random().nextInt(images.length)]));
     }
+    //AutoService autoService;
 
     mRecyclerView.setAdapter(fastAdapter);
   }
